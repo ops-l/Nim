@@ -17,16 +17,12 @@ when defined(nodejs) and not defined(nimscript):
   var programResult* {.importc: "process.exitCode".}: int
   programResult = 0
 
+
 type BiggestUInt* = uint32
   ## is an alias for the biggest unsigned integer type the Nim compiler
   ## supports. Currently this is ``uint32`` for JS and ``uint64`` for other
   ## targets.
 
-
-when defined(nimdoc):
-  type
-    JsRoot* = ref object of RootObj
-      ## Root type of the JavaScript object hierarchy
 
 proc add*(x: var string, y: cstring) {.asmNoStackFrame.} =
   asm """

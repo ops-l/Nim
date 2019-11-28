@@ -824,6 +824,11 @@ type
     ##
     ## This is only raised if the `segfaults module <segfaults.html>`_ was imported!
 
+when defined(js) or defined(nimdoc):
+  type
+    JsRoot* = ref object of RootObj
+      ## Root type of the JavaScript object hierarchy
+
 proc unsafeNew*[T](a: var ref T, size: Natural) {.magic: "New", noSideEffect.}
   ## Creates a new object of type ``T`` and returns a safe (traced)
   ## reference to it in ``a``.
@@ -1762,6 +1767,7 @@ proc add*(x: var string, y: string) {.magic: "AppendStrStr", noSideEffect.}
   ##   tmp.add("ab")
   ##   tmp.add("cd")
   ##   assert(tmp == "abcd")
+
 
 type
   Endianness* = enum ## Type describing the endianness of a processor.

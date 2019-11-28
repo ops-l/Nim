@@ -13,34 +13,6 @@
 
 
 
-when not defined(nimscript):
-  {.push stackTrace: off, profiler:off.}
-
-  proc atomicInc*(memLoc: var int, x: int = 1): int {.inline,
-    discardable, benign.}
-    ## Atomic increment of `memLoc`. Returns the value after the operation.
-
-  proc atomicDec*(memLoc: var int, x: int = 1): int {.inline,
-    discardable, benign.}
-    ## Atomic decrement of `memLoc`. Returns the value after the operation.
-
-  include "system/atomics"
-
-  {.pop.}
-
-
-
-when hasAlloc:
-  {.push stack_trace:off, profiler:off.}
-  proc add*(x: var string, y: cstring) =
-    var i = 0
-    while y[i] != '\0':
-      add(x, y[i])
-      inc(i)
-  {.pop.}
-
-
-
 when not defined(nimSeqsV2):
   type
     TGenericSeq {.compilerproc, pure, inheritable.} = object
@@ -61,10 +33,6 @@ when not defined(nimscript):
   when not defined(nimV2):
     include "system/hti"
 
-when not defined(nimscript) and hostOS != "standalone":
-  include "system/cgprocs"
-when not defined(nimscript) and hasAlloc and not defined(nimSeqsV2):
-  proc addChar(s: NimString, c: char): NimString {.compilerproc, benign.}
 
 proc newSeqUninitialized*[T: SomeNumber](len: Natural): seq[T] =
   ## Creates a new sequence of type ``seq[T]`` with length ``len``.
@@ -192,14 +160,23 @@ else:
     ## last 32 bits from `x`.
     ## **Deprecated since version 0.19.9**: Use unsigned integers instead.
 
-when hostOS != "standalone" or defined(nimscript): # ??
+
+when hostOS != "standalone":
   var programResult* {.compilerproc, exportc: "nim_program_result".}: int
     ## deprecated, prefer ``quit``
+
+
+when not defined(nimscript) and hostOS != "standalone":
+  include "system/cgprocs"
+when not defined(nimscript) and hasAlloc and not defined(nimSeqsV2):
+  proc addChar(s: NimString, c: char): NimString {.compilerproc, benign.}
+
 
 type BiggestUInt* = uint64
   ## is an alias for the biggest unsigned integer type the Nim compiler
   ## supports. Currently this is ``uint32`` for JS and ``uint64`` for other
   ## targets.
+
 
 when not defined(booting) and defined(nimTrMacros):
   template swapRefsInArray*{swap(arr[a], arr[b])}(arr: openArray[ref], a, b: int) =
@@ -207,6 +184,34 @@ when not defined(booting) and defined(nimTrMacros):
     # implementation will cause unsureAsgnRef to be emitted which causes
     # unnecessary slow down in this case.
     swap(cast[ptr pointer](addr arr[a])[], cast[ptr pointer](addr arr[b])[])
+
+
+when not defined(nimscript):
+  {.push stackTrace: off, profiler:off.}
+
+  proc atomicInc*(memLoc: var int, x: int = 1): int {.inline,
+    discardable, benign.}
+    ## Atomic increment of `memLoc`. Returns the value after the operation.
+
+  proc atomicDec*(memLoc: var int, x: int = 1): int {.inline,
+    discardable, benign.}
+    ## Atomic decrement of `memLoc`. Returns the value after the operation.
+
+  include "system/atomics"
+
+  {.pop.}
+
+
+
+when hasAlloc:
+  {.push stack_trace:off, profiler:off.}
+  proc add*(x: var string, y: cstring) =
+    var i = 0
+    while y[i] != '\0':
+      add(x, y[i])
+      inc(i)
+  {.pop.}
+
 
 
 proc likelyProc(val: bool): bool {.importc: "NIM_LIKELY", nodecl, noSideEffect.}
